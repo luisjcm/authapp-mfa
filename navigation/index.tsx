@@ -57,7 +57,15 @@ function VerifyScreenWrapper({ navigation, route }: any) {
 }
 
 function DoneScreenWrapper({ navigation }: any) {
-  return <Done onGoHome={() => navigation.navigate('Home')} />;
+
+  const goHome = () => {
+    // Deja SOLO Home en la pila (no hay vuelta a Done/Verify/Login)
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home' }],
+    });
+  };
+  return <Done onGoHome={goHome} />;
 }
 
 export default function RootNavigator() {
@@ -74,7 +82,7 @@ export default function RootNavigator() {
         <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
         <Stack.Screen name="Login" component={LoginScreenWrapper} options={{ title: 'Iniciar sesión' }} />
         <Stack.Screen name="Verify" component={VerifyScreenWrapper} options={{ title: 'Verificación' }} />
-        <Stack.Screen name="Done" component={DoneScreenWrapper} options={{ title: 'Listo' }} />
+        <Stack.Screen name="Done" component={DoneScreenWrapper} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
