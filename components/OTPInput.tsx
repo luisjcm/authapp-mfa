@@ -19,6 +19,7 @@ type Props = {
   fit?: boolean;   // ⬅️ NUEVO: ajusta el tamaño para que quepa en el ancho disponible
   minSize?: number; // tamaño mínimo al autoajustar
     error?: boolean;      // ← NUEVO
+  secure?: boolean;   // ← NUEVO
 
 };
 
@@ -32,6 +33,7 @@ export default function OTPInput({
   fit = false,
   minSize = 40,
     error = false,
+    secure = false
 
 }: Props) {
   const [values, setValues] = React.useState<string[]>(

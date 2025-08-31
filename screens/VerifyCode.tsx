@@ -22,6 +22,9 @@ export default function VerifyCode({ onVerify, onResend, destination }: Props) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(false);
 
+  const [resetOtpKey, setResetOtpKey] = React.useState(0);
+
+
   const handleVerify = async (c: string) => {
     if (loading) return;
     setLoading(true);
@@ -47,11 +50,14 @@ export default function VerifyCode({ onVerify, onResend, destination }: Props) {
         <View style={{ height: SPACING.xl }} />
 
         <OTPInput
+          key={resetOtpKey}     // ⬅️ remonta el OTP al cambiar esta key
+
           length={6}
           fit
           gap={10}
           minSize={38}
           error={error}                 // ← pinta bordes rojos si hay error
+          secure={true}                 // ← oculta dígitos
           onChangeCode={(c) => { setCode(c); if (error) setError(false); }}
           onFulfill={(c) => handleVerify(c)}  // ← auto-submit al completar
         />
@@ -69,8 +75,19 @@ export default function VerifyCode({ onVerify, onResend, destination }: Props) {
         />
 
         {!!onResend && (
-          <Text onPress={onResend} style={styles.resend}>Reenviar código</Text>
-        )}
+  <Text
+    onPress={async () => {
+      setCode('');        // limpia OTP
+      setError(false);    // limpia estado de error
+      setResetOtpKey(k => k + 1);  // ⬅️ fuerza el clear de las casillas
+
+      await onResend();   // acción (mock o backend)
+    }}
+    style={styles.resend}
+  >
+    Reenviar código
+  </Text>
+)}
       </View>
     </Screen>
   );
