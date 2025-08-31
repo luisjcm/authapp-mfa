@@ -1,48 +1,85 @@
+// screens/VerifyCode.tsx
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
+import Screen from '../components/Screen';
+import Button from '../components/Button';
+import OTPInput from '../components/OTPInput';
+import { COLORS, FONTS, SPACING } from '../theme';
+// opcional haptics
+import * as Haptics from 'expo-haptics';
+
 
 type Props = {
-  onVerify: (code: string) => void;
+  onVerify: (code: string) => Promise<void> | void;
   onResend?: () => void;
   destination?: string;
 };
 
+
+
 export default function VerifyCode({ onVerify, onResend, destination }: Props) {
   const [code, setCode] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(false);
+
+  const handleVerify = async (c: string) => {
+    if (loading) return;
+    setLoading(true);
+    setError(false);
+    try {
+      await onVerify(c);
+      // si onVerify falla lanzando error, caemos al catch
+    } catch (e) {
+      setError(true);
+      // feedback táctil
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <View style={styles.wrap}>
-      <Text style={styles.title}>Verifica el código</Text>
-      {!!destination && (
-        <Text style={{ color:'#9ca3af', marginBottom:4 }}>
-          Te enviamos un código a {destination}
-        </Text>
-      )}
-      <TextInput
-        placeholder="123456"
-        placeholderTextColor="#9ca3af"
-        style={styles.input}
-        value={code}
-        onChangeText={setCode}
-        keyboardType="number-pad"
-        maxLength={6}
-      />
-      <Pressable style={styles.btn} onPress={() => code.length === 6 && onVerify(code)}>
-        <Text style={styles.btnTxt}>Confirmar</Text>
-      </Pressable>
-      {!!onResend && (
-        <Pressable onPress={onResend}>
-          <Text style={{ color:'#a3e635', marginTop:8 }}>Reenviar código</Text>
-        </Pressable>
-      )}
-    </View>
+    <Screen>
+      <View style={styles.wrap}>
+        <Text style={styles.title}>Verifica tu código</Text>
+        {!!destination && <Text style={styles.subtitle}>Enviado a {destination}</Text>}
+
+        <View style={{ height: SPACING.xl }} />
+
+        <OTPInput
+          length={6}
+          fit
+          gap={10}
+          minSize={38}
+          error={error}                 // ← pinta bordes rojos si hay error
+          onChangeCode={(c) => { setCode(c); if (error) setError(false); }}
+          onFulfill={(c) => handleVerify(c)}  // ← auto-submit al completar
+        />
+
+        {error && (
+          <Text style={styles.error}>Código incorrecto o expirado. Intenta de nuevo.</Text>
+        )}
+
+        <View style={{ height: SPACING.xl }} />
+
+        <Button
+          label={loading ? 'Verificando…' : 'Confirmar'}
+          onPress={() => handleVerify(code)}
+          disabled={code.length !== 6 || loading}   // ← deshabilitado hasta 6 dígitos
+        />
+
+        {!!onResend && (
+          <Text onPress={onResend} style={styles.resend}>Reenviar código</Text>
+        )}
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap:{ gap:12 },
-  title:{ color:'white', fontSize:20, fontWeight:'700' },
-  input:{ backgroundColor:'#111827', color:'white', padding:12, borderRadius:10, borderWidth:1, borderColor:'#1f2937', minWidth:260, letterSpacing:4, textAlign:'center' },
-  btn:{ backgroundColor:'#22c55e', padding:12, borderRadius:10, alignItems:'center' },
-  btnTxt:{ fontWeight:'700', color:'#0b111f' }
+  wrap: { width: '100%', maxWidth: 420, alignSelf: 'center' },
+  title: { color: COLORS.text, fontFamily: FONTS.bold, fontSize: 24 },
+  subtitle: { color: COLORS.muted, fontFamily: FONTS.regular, marginTop: 6 },
+  resend: { color: '#a3e635', marginTop: SPACING.md, fontFamily: FONTS.semibold },
+  error: { color: '#ef4444', marginTop: SPACING.sm, fontFamily: FONTS.semibold }
 });

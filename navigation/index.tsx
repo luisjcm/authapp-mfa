@@ -1,16 +1,21 @@
+import { mockVerify, TEST_CODE } from '../lib/mock';
+
+
 import React from 'react';
 import { NavigationContainer, DefaultTheme, Theme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Home from '../screens/home';
-import Login from '../screens/login';
+import Home from '../screens/Home';
+import Login from '../screens/Login';
 import VerifyCode from '../screens/VerifyCode';
+import Done from '../screens/Done'; // o '../screens/done' si tu archivo está en minúsculas
+
 import { View, Text } from 'react-native';
 
 export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   Verify: { destination: string };
-  Done: undefined;
+  Done: undefined;  
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -29,13 +34,7 @@ const MyTheme: Theme = {
   },
 };
 
-function DoneScreen() {
-  return (
-    <View style={{ flex:1, alignItems:'center', justifyContent:'center' }}>
-      <Text style={{ color:'#fff', fontSize:22, fontWeight:'700' }}>✅ Sesión verificada</Text>
-    </View>
-  );
-}
+
 
 function LoginScreenWrapper({ navigation }: any) {
   return <Login onSubmit={(value) => navigation.navigate('Verify', { destination: value })} />;
@@ -46,10 +45,19 @@ function VerifyScreenWrapper({ navigation, route }: any) {
   return (
     <VerifyCode
       destination={destination}
-      onVerify={(code) => { if (code.length === 6) navigation.replace('Done'); }}
-      onResend={() => {}}
+      onVerify={async (code) => {
+        await mockVerify(code);          // valida contra TEST_CODE
+        navigation.replace('Done');      // éxito
+      }}
+      onResend={() => {
+        console.log('TEST_CODE:', TEST_CODE); // útil para recordar el código en dev
+      }}
     />
   );
+}
+
+function DoneScreenWrapper({ navigation }: any) {
+  return <Done onGoHome={() => navigation.navigate('Home')} />;
 }
 
 export default function RootNavigator() {
@@ -66,7 +74,7 @@ export default function RootNavigator() {
         <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
         <Stack.Screen name="Login" component={LoginScreenWrapper} options={{ title: 'Iniciar sesión' }} />
         <Stack.Screen name="Verify" component={VerifyScreenWrapper} options={{ title: 'Verificación' }} />
-        <Stack.Screen name="Done" component={DoneScreen} options={{ title: 'Listo' }} />
+        <Stack.Screen name="Done" component={DoneScreenWrapper} options={{ title: 'Listo' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
