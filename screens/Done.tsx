@@ -15,11 +15,11 @@ export default function Done({ onGoHome }: Props) {
           <View style={styles.badge}>
             <Text style={styles.badgeIcon}>✓</Text>
           </View>
-          <Text style={styles.title}>Autenticación completada</Text>
+          <Text style={styles.title}>Todo en orden</Text>
         </View>
 
         <Text style={styles.subtitle}>
-          Tu acceso ha sido confirmado correctamente.
+          Tu identidad fue confirmada correctamente.
         </Text>
 
         <Button

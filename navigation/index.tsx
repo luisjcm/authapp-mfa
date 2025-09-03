@@ -1,21 +1,28 @@
-import { mockVerify, TEST_CODE } from '../lib/mock';
+// src/navigation/index.tsx
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  Theme,
+} from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// PANTALLAS
+import Home from "../screens/Home";
+import EmailScreen from "../screens/EmailScreen";
+import OtpScreen from "../screens/OtpScreen";
+import Done from "../screens/Done";
 
-import React from 'react';
-import { NavigationContainer, DefaultTheme, Theme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Home from '../screens/Home';
-import Login from '../screens/Login';
-import VerifyCode from '../screens/VerifyCode';
-import Done from '../screens/Done'; // o '../screens/done' si tu archivo está en minúsculas
+// API (cliente front, NO del server)
+import { requestOtp, verifyOtp, resendOtp } from "../server/src/api/auth";
 
-import { View, Text } from 'react-native';
-
+// ---- Tipado de rutas en UN SOLO STACK ----
 export type RootStackParamList = {
   Home: undefined;
-  Login: undefined;
-  Verify: { destination: string };
-  Done: undefined;  
+  Email: undefined;
+  Otp: { email: string };
+  Done: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,63 +32,97 @@ const MyTheme: Theme = {
   dark: true,
   colors: {
     ...DefaultTheme.colors,
-    background: '#0f172a',
-    card: '#111827',
-    text: '#ffffff',
-    border: '#1f2937',
-    primary: '#22c55e',
-    notification: '#22c55e',
+    background: "#0f172a",
+    card: "#111827",
+    text: "#ffffff",
+    border: "#1f2937",
+    primary: "#22c55e",
+    notification: "#22c55e",
   },
 };
 
-
-
-function LoginScreenWrapper({ navigation }: any) {
-  return <Login onSubmit={(value) => navigation.navigate('Verify', { destination: value })} />;
-}
-
-function VerifyScreenWrapper({ navigation, route }: any) {
-  const { destination } = route.params;
-  return (
-    <VerifyCode
-      destination={destination}
-      onVerify={async (code) => {
-        await mockVerify(code);          // valida contra TEST_CODE
-        navigation.replace('Done');      // éxito
-      }}
-      onResend={() => {
-        console.log('TEST_CODE:', TEST_CODE); // útil para recordar el código en dev
-      }}
-    />
-  );
-}
-
-function DoneScreenWrapper({ navigation }: any) {
-
-  const goHome = () => {
-    // Deja SOLO Home en la pila (no hay vuelta a Done/Verify/Login)
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Home' }],
-    });
-  };
-  return <Done onGoHome={goHome} />;
-}
-
 export default function RootNavigator() {
+  const [session, setSession] = useState<{ email: string } | null>(null);
+  const [checking, setChecking] = useState(true);
+
+  // Carga de sesión al abrir la app
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem("session");
+        if (raw) setSession(JSON.parse(raw));
+      } finally {
+        setChecking(false);
+      }
+    })();
+  }, []);
+
+  // Ruta inicial según sesión
+  const initialRoute = useMemo<keyof RootStackParamList>(() => {
+    return session ? "Home" : "Email";
+  }, [session]);
+
+  // Wrappers para inyectar tu API + persistencia
+  function EmailScreenWrapper({ navigation }: any) {
+    return (
+      <EmailScreen
+        onSubmit={async (email: string) => {
+          const clean = email.trim();
+          await requestOtp(clean);
+          navigation.navigate("Otp", { email: clean });
+        }}
+      />
+    );
+  }
+
+  function OtpScreenWrapper({ navigation, route }: any) {
+    const { email } = route.params as { email: string };
+    return (
+      <OtpScreen
+        email={email}
+        onVerify={async (code: string) => {
+          // 1) Verificar OTP en el backend
+          await verifyOtp(email, code);
+          // 2) Guardar sesión
+          const sess = { email };
+          await AsyncStorage.setItem("session", JSON.stringify(sess));
+          setSession(sess);
+          // 3) Mantener tu flujo actual → Done
+          navigation.replace("Done");
+        }}
+        onResend={async () => {
+          await resendOtp(email);
+        }}
+      />
+    );
+  }
+
+  function DoneScreenWrapper({ navigation }: any) {
+    const goHome = () => {
+      // Reset al Home para evitar volver a OTP/Email
+      navigation.reset({ index: 0, routes: [{ name: "Home" }] });
+    };
+    return <Done onGoHome={goHome} />;
+  }
+
+  if (checking) {
+    // Opcional: aquí puedes renderizar un Splash/Loader
+    return null;
+  }
+
   return (
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName={initialRoute}
         screenOptions={{
-          headerStyle: { backgroundColor: '#111827' },
-          headerTintColor: '#fff',
-          contentStyle: { backgroundColor: '#0f172a' },
+          headerStyle: { backgroundColor: "#111827" },
+          headerTintColor: "#fff",
+          contentStyle: { backgroundColor: "#0f172a" },
         }}
       >
-        <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
-        <Stack.Screen name="Login" component={LoginScreenWrapper} options={{ title: 'Iniciar sesión' }} />
-        <Stack.Screen name="Verify" component={VerifyScreenWrapper} options={{ title: 'Verificación' }} />
+        <Stack.Screen name="Home" component={Home} options={{ title: "Inicio" }} />
+        <Stack.Screen name="Email" component={EmailScreenWrapper} options={{ title: "Iniciar sesión" }} />
+        <Stack.Screen name="Otp" component={OtpScreenWrapper} options={{ title: "Código OTP" }} />
         <Stack.Screen name="Done" component={DoneScreenWrapper} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -27,7 +27,7 @@ export default function Home({ navigation }: any) {
         <Text style={styles.muted}>Siguiente: crear pantallas Login y Verify Code</Text>
 
         <View style={{ height: 16 }} />
-        <PrimaryButton label="Ir a Login" onPress={() => navigation.navigate('Login')} />
+        <PrimaryButton label="Iniciar sesión" onPress={() => navigation.navigate('Email')} />
       </View>
     </SafeAreaView>
   );
