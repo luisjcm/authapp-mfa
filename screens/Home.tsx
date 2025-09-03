@@ -28,7 +28,11 @@ export default function Home({ navigation }: any) {
 
         <View style={{ height: 16 }} />
         <PrimaryButton label="Iniciar sesión" onPress={() => navigation.navigate('Email')} />
+        <PrimaryButton label="Abrir Authenticator" onPress={() => navigation.navigate('Authenticator')} />
+
       </View>
+
+      
     </SafeAreaView>
   );
 }

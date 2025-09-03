@@ -14,15 +14,22 @@ import EmailScreen from "../screens/EmailScreen";
 import OtpScreen from "../screens/OtpScreen";
 import Done from "../screens/Done";
 
+// 👇 NUEVOS imports
+import AuthenticatorScreen from "../screens/AuthenticatorScreen";
+import AddTokenScreen from "../screens/AddTokenScreen";
+
 // API (cliente front, NO del server)
 import { requestOtp, verifyOtp, resendOtp } from "../server/src/api/auth";
 
 // ---- Tipado de rutas en UN SOLO STACK ----
+// 👇 AGREGA las rutas nuevas aquí
 export type RootStackParamList = {
   Home: undefined;
   Email: undefined;
   Otp: { email: string };
   Done: undefined;
+  Authenticator: undefined; // ✅ nueva
+  AddToken: undefined;      // ✅ nueva
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -81,13 +88,10 @@ export default function RootNavigator() {
       <OtpScreen
         email={email}
         onVerify={async (code: string) => {
-          // 1) Verificar OTP en el backend
           await verifyOtp(email, code);
-          // 2) Guardar sesión
           const sess = { email };
           await AsyncStorage.setItem("session", JSON.stringify(sess));
           setSession(sess);
-          // 3) Mantener tu flujo actual → Done
           navigation.replace("Done");
         }}
         onResend={async () => {
@@ -99,15 +103,13 @@ export default function RootNavigator() {
 
   function DoneScreenWrapper({ navigation }: any) {
     const goHome = () => {
-      // Reset al Home para evitar volver a OTP/Email
       navigation.reset({ index: 0, routes: [{ name: "Home" }] });
     };
     return <Done onGoHome={goHome} />;
   }
 
   if (checking) {
-    // Opcional: aquí puedes renderizar un Splash/Loader
-    return null;
+    return null; // Splash opcional
   }
 
   return (
@@ -124,6 +126,10 @@ export default function RootNavigator() {
         <Stack.Screen name="Email" component={EmailScreenWrapper} options={{ title: "Iniciar sesión" }} />
         <Stack.Screen name="Otp" component={OtpScreenWrapper} options={{ title: "Código OTP" }} />
         <Stack.Screen name="Done" component={DoneScreenWrapper} options={{ headerShown: false }} />
+
+        {/* 👇 NUEVAS RUTAS (ya tipadas arriba) */}
+        <Stack.Screen name="Authenticator" component={AuthenticatorScreen} options={{ title: "Códigos TOTP" }} />
+        <Stack.Screen name="AddToken" component={AddTokenScreen} options={{ title: "Escanear QR" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
