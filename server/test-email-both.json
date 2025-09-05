@@ -1,7 +1,0 @@
-{
-  "to": "destinatario@correo.com",
-  "toName": "Luis",
-  "verifyCode": "739015",
-  "verifyLink": "https://app.tudominio.com/verify?token=abc123",
-  "codeExpiresIn": 10
-}
