@@ -14,6 +14,9 @@ import EmailScreen from "../screens/EmailScreen";
 import OtpScreen from "../screens/OtpScreen";
 import Done from "../screens/Done";
 
+import AboutScreen from "../screens/AboutScreen"; // 👈 import
+
+
 // 👇 NUEVOS imports
 import AuthenticatorScreen from "../screens/AuthenticatorScreen";
 import AddTokenScreen from "../screens/AddTokenScreen";
@@ -30,6 +33,7 @@ export type RootStackParamList = {
   Done: undefined;
   Authenticator: undefined; // ✅ nueva
   AddToken: undefined;      // ✅ nueva
+  About: undefined;         // ✅ nueva
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -130,6 +134,8 @@ export default function RootNavigator() {
         {/* 👇 NUEVAS RUTAS (ya tipadas arriba) */}
         <Stack.Screen name="Authenticator" component={AuthenticatorScreen} options={{ title: "Códigos TOTP" }} />
         <Stack.Screen name="AddToken" component={AddTokenScreen} options={{ title: "Escanear QR" }} />
+
+        <Stack.Screen name="About" component={AboutScreen} options={{ title: "Acerca de" }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

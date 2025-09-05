@@ -29,6 +29,21 @@ export default function Home({ navigation }: any) {
         <View style={{ height: 16 }} />
         <PrimaryButton label="Iniciar sesión" onPress={() => navigation.navigate('Email')} />
         <PrimaryButton label="Abrir Authenticator" onPress={() => navigation.navigate('Authenticator')} />
+<Pressable
+  onPress={() => navigation.navigate("About")}
+  style={({ pressed }) => [
+    {
+      backgroundColor: "#22c55e",
+      paddingVertical: 12,
+      borderRadius: 12,
+      alignItems: "center",
+      marginTop: 12,
+    },
+    pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
+  ]}
+>
+  <Text style={{ color: "#0b111f", fontWeight: "800" }}>Acerca de</Text>
+</Pressable>
 
       </View>
 
