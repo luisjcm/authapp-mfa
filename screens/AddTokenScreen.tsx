@@ -1,10 +1,11 @@
-// src/screens/AddTokenScreen.tsx
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { parseOtpauthUri, TotpAccount } from "../server/src/utils/totp";
+
+
+
 
 const STORAGE_KEY = "totp_accounts";
 
@@ -14,11 +15,10 @@ export default function AddTokenScreen({ navigation }: any) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!permission) requestPermission();
+    if (!permission) {
+      requestPermission();
+    }
   }, [permission]);
-
-  const makeKey = (a: { issuer?: string; label: string }) =>
-    `${(a.issuer || "SinIssuer").toLowerCase()}::${a.label.toLowerCase()}`;
 
   const onBarCodeScanned = async ({ data }: { data: string }) => {
     if (scanned) return;
@@ -32,55 +32,13 @@ export default function AddTokenScreen({ navigation }: any) {
       return;
     }
 
-    // Leer lista actual
+    // Guardar en AsyncStorage
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
     const list: TotpAccount[] = raw ? JSON.parse(raw) : [];
-
-    // Buscar duplicado (issuer+label)
-    const existingIndex = list.findIndex((a) => makeKey(a) === makeKey(parsed));
-
-    if (existingIndex !== -1) {
-      const existing = list[existingIndex];
-      const name = `${existing.issuer || "SinIssuer"} - ${existing.label}`;
-
-      // Preguntar si reemplazar o cancelar
-      Alert.alert(
-        "Cuenta ya existente",
-        `Ya tienes "${name}". ¿Deseas reemplazarla?`,
-        [
-          {
-            text: "Cancelar",
-            style: "cancel",
-            onPress: () => {
-              setScanned(false); // permitir reintento
-            },
-          },
-          {
-            text: "Reemplazar",
-            style: "destructive",
-            onPress: async () => {
-              // Conservar el id anterior para no romper referencias
-              const replacement: TotpAccount = { ...parsed, id: existing.id };
-              list[existingIndex] = replacement;
-              await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-              await Haptics.notificationAsync(
-                Haptics.NotificationFeedbackType.Success
-              );
-              navigation.replace("Authenticator"); // cerrar cámara y volver a la lista
-            },
-          },
-        ]
-      );
-
-      return;
-    }
-
-    // No duplicado → agregar al inicio
-    list.unshift(parsed);
+    list.push(parsed);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    navigation.replace("Authenticator"); // cerrar cámara y volver a la lista
+    navigation.replace("Authenticator");
   };
 
   if (!permission) {
@@ -108,7 +66,9 @@ export default function AddTokenScreen({ navigation }: any) {
         style={{ flex: 1 }}
         facing="back"
         onBarcodeScanned={onBarCodeScanned}
-        barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"],
+        }}
       />
       {error && (
         <View style={styles.error}>

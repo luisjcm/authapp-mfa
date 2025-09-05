@@ -8,6 +8,8 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import BiometricGate from "../components/BiometricGate";
+
 // PANTALLAS
 import Home from "../screens/Home";
 import EmailScreen from "../screens/EmailScreen";
@@ -23,6 +25,10 @@ import AddTokenScreen from "../screens/AddTokenScreen";
 
 // API (cliente front, NO del server)
 import { requestOtp, verifyOtp, resendOtp } from "../server/src/api/auth";
+
+
+
+const DEMO_MODE = true; // ← ponlo en false para la versión real
 
 // ---- Tipado de rutas en UN SOLO STACK ----
 // 👇 AGREGA las rutas nuevas aquí
@@ -126,7 +132,17 @@ export default function RootNavigator() {
           contentStyle: { backgroundColor: "#0f172a" },
         }}
       >
-        <Stack.Screen name="Home" component={Home} options={{ title: "Inicio" }} />
+        
+        <Stack.Screen
+  name="Home"
+  options={{ title: "Inicio" }}
+>
+  {(props) => (
+    <BiometricGate prompt="Confirma con biometría o patrón" demoMode={DEMO_MODE}>
+      <Home {...props} />
+    </BiometricGate>
+  )}
+</Stack.Screen>
         <Stack.Screen name="Email" component={EmailScreenWrapper} options={{ title: "Iniciar sesión" }} />
         <Stack.Screen name="Otp" component={OtpScreenWrapper} options={{ title: "Código OTP" }} />
         <Stack.Screen name="Done" component={DoneScreenWrapper} options={{ headerShown: false }} />
