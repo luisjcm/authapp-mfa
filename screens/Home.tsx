@@ -4,6 +4,9 @@ import { SafeAreaView, View, Text, StyleSheet, Pressable } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation'; // <- ajusta la ruta si es necesario
 
+import Button from '../components/ui/Button';
+
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 type PrimaryButtonProps = { label: string; onPress: () => void };
@@ -31,31 +34,16 @@ export default function Home({ navigation }: Props) {
         <Text style={styles.paragraph}>
           Contador (state + TypeScript): <Text style={styles.bold}>{count}</Text>
         </Text>
-        <PrimaryButton label="Sumar +1" onPress={() => setCount((c) => c + 1)} />
+<Button title="Sumar +1" onPress={() => setCount(c => c + 1)} />
 
         <View style={{ height: 24 }} />
         <Text style={styles.muted}>Siguiente: crear pantallas Login y Verify Code</Text>
 
         <View style={{ height: 16 }} />
-        <PrimaryButton label="Iniciar sesión" onPress={() => navigation.navigate('Email')} />
-        <PrimaryButton label="Abrir Authenticator" onPress={() => navigation.navigate('Authenticator')} />
-
-        <Pressable
-          onPress={() => navigation.navigate('About')}
-          style={({ pressed }) => [
-            {
-              backgroundColor: '#1754a3ff',
-              paddingVertical: 12,
-              borderRadius: 12,
-              alignItems: 'center',
-              marginTop: 12,
-            },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-          ]}
-        >
-          <Text style={{ color: '#0b111f', fontWeight: '800' }}>Acerca de</Text>
-        </Pressable>
-      </View>
+<Button title="Iniciar sesión" onPress={() => navigation.navigate('Email')} />
+<Button title="Abrir Authenticator" onPress={() => navigation.navigate('Authenticator')} />
+<Button title="Acerca de" onPress={() => navigation.navigate('About')} />
+        </View>
     </SafeAreaView>
   );
 }

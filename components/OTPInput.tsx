@@ -16,10 +16,10 @@ type Props = {
   autoFocus?: boolean;
   size?: number;   // tamaño deseado (se usa si fit=false)
   gap?: number;    // espacio entre cajas
-  fit?: boolean;   // ⬅️ NUEVO: ajusta el tamaño para que quepa en el ancho disponible
+  fit?: boolean;   // ajusta el tamaño para que quepa en el ancho disponible
   minSize?: number; // tamaño mínimo al autoajustar
-    error?: boolean;      // ← NUEVO
-  secure?: boolean;   // ← NUEVO
+    error?: boolean;      
+  secure?: boolean;   
 
 };
 
@@ -108,7 +108,7 @@ React.useEffect(() => { onFulfillRef.current = onFulfill; }, [onFulfill]);
   return (
     <View
       style={[styles.row, { columnGap: gap }]}
-      onLayout={e => setContainerW(e.nativeEvent.layout.width)} // ⬅️ detecta ancho disponible
+      onLayout={e => setContainerW(e.nativeEvent.layout.width)} // disponible
     >
       {values.map((val, i) => (
         <TextInput
@@ -149,9 +149,9 @@ React.useEffect(() => { onFulfillRef.current = onFulfill; }, [onFulfill]);
 
 const styles = StyleSheet.create({
   row: {
-    width: '100%',                       // ⬅️ ocupa todo el ancho disponible
+    width: '100%',                       
     flexDirection: 'row',
-    justifyContent: 'center',            // con columnGap mantiene espacios iguales
+    justifyContent: 'center',            
   },
   box: {
     borderWidth: 1,

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Modal, View, Text, Pressable, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { COLORS } from '../theme';
 
 type Props = {
   visible: boolean;
@@ -68,7 +69,7 @@ export default function DemoBiometricModal({
 
             <Pressable
               onPress={handleSuccess}
-              style={{ flex:1, paddingVertical:12, borderRadius:10, backgroundColor:'#0969da', alignItems:'center' }}>
+              style={{ flex:1, paddingVertical:12, borderRadius:10, backgroundColor:COLORS.primary, alignItems:'center' }}>
               <Text style={{ color:'#fff', fontWeight:'600' }}>Validar</Text>
             </Pressable>
           </View>

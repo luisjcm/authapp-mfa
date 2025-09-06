@@ -1,5 +1,5 @@
 // src/screens/AuthenticatorScreen.tsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback  } from "react";
 import {
   View,
   Text,
@@ -18,7 +18,15 @@ import {
   remainingSeconds,
 } from "../server/src/utils/totp";
 
+import { useFocusEffect } from '@react-navigation/native';
+
 const STORAGE_KEY = "totp_accounts";
+
+
+
+
+let code = "------";
+let invalid = false;
 
 export default function AuthenticatorScreen({ navigation }: any) {
   const [accounts, setAccounts] = useState<TotpAccount[]>([]);
@@ -72,6 +80,22 @@ export default function AuthenticatorScreen({ navigation }: any) {
       }
     };
   }, []);
+
+
+  useFocusEffect(
+  useCallback(() => {
+    let cancelled = false;
+    (async () => {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (cancelled) return;
+
+      const arr: TotpAccount[] = raw ? JSON.parse(raw) : [];
+      setAccounts(arr);
+    })();
+
+    return () => { cancelled = true; };
+  }, [])
+);
 
   // ===== Eliminar con confirmación =====
   function confirmDelete(id: string) {
@@ -131,32 +155,57 @@ export default function AuthenticatorScreen({ navigation }: any) {
 
   // ===== Item de la lista con Swipeable + long-press =====
   const renderItem = ({ item }: { item: TotpAccount }) => {
-    const period = item.period ?? 30;
-    const rem = remainingSeconds(period);
-    const code = genTotp(item); // se recalcula cada render/segundo
-    const codeSpaced = code.replace(/(\d{3})(\d{3})/, "$1 $2");
+  const period = item.period ?? 30;
+  const rem = remainingSeconds(period);
 
-    const RightActions = () => (
-      <Pressable onPress={() => confirmDelete(item.id)} style={styles.deleteBtn}>
-        <Text style={styles.deleteTxt}>Eliminar</Text>
-      </Pressable>
-    );
+  // ✅ Protección contra secretos Base32 inválidos
+  let code = '------';
+  let invalid = false;
+  try {
+    code = genTotp(item); // se recalcula cada render/segundo
+  } catch {
+    invalid = true;
+  }
 
-    return (
-      <Swipeable renderRightActions={RightActions}>
-        <Pressable onLongPress={() => openEdit(item)} style={styles.card}>
-          <View>
-            <Text style={styles.issuer}>{item.issuer || item.label}</Text>
-            {item.issuer && item.label && item.issuer !== item.label && (
-              <Text style={styles.label}>{item.label}</Text>
-            )}
+  // Si está inválido, mostramos un “placeholder”; si no, espaciamos 3-3 (para 6 dígitos)
+  const codeSpaced = invalid ? '—— ——' : code.replace(/(\d{3})(\d{3})/, '$1 $2');
+
+  const RightActions = () => (
+    <Pressable onPress={() => confirmDelete(item.id)} style={styles.deleteBtn}>
+      <Text style={styles.deleteTxt}>Eliminar</Text>
+    </Pressable>
+  );
+
+  
+
+  return (
+    <Swipeable renderRightActions={RightActions}>
+      <Pressable onLongPress={() => openEdit(item)} style={styles.card}>
+        <View>
+          <Text style={styles.issuer}>{item.issuer || item.label}</Text>
+
+          {item.issuer && item.label && item.issuer !== item.label && (
+            <Text style={styles.label}>{item.label}</Text>
+          )}
+
+          {/* ✅ Si hay error de secret, mostramos aviso en rojo */}
+          {invalid ? (
+            <>
+              <Text style={styles.error}>
+                Secreto inválido (Base32). Edita o elimina la cuenta.
+              </Text>
+              <Text style={[styles.code, { opacity: 0.5 }]}>{codeSpaced}</Text>
+            </>
+          ) : (
             <Text style={styles.code}>{codeSpaced}</Text>
-          </View>
-          <CircularTimer period={period} remaining={rem} />
-        </Pressable>
-      </Swipeable>
-    );
-  };
+          )}
+        </View>
+
+        <CircularTimer period={period} remaining={rem} />
+      </Pressable>
+    </Swipeable>
+  );
+};
 
   return (
     <View style={styles.container}>
@@ -315,4 +364,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#2563eb",
     borderRadius: 10,
   },
+  error: { color: '#ef4444', marginTop: 4, fontWeight: '600' },
+
 });

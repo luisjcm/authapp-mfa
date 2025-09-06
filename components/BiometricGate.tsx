@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Pressable, ActivityIndicator, AppState } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import DemoBiometricModal from './DemoBiometricModal';
+import { COLORS } from '../theme';
 
 type Props = {
   children: React.ReactNode;
@@ -74,12 +75,12 @@ export default function BiometricGate({ children, prompt = 'Confirma tu identida
       <>
         {/* Pantalla fallback por si cierran el modal o falla la auth */}
         <View style={{ flex:1, alignItems:'center', justifyContent:'center', padding:24, gap:12 }}>
-          <Text style={{ fontSize:16, textAlign:'center' }}>
+          <Text style={{ fontSize:16, textAlign:'center', color: COLORS.text }}>
             {error ?? (demoMode ? 'Activa la validación de demo para continuar.' : 'Necesitas confirmar tu identidad para continuar.')}
           </Text>
           <Pressable
             onPress={runCheck}
-            style={{ paddingHorizontal:16, paddingVertical:10, borderRadius:10, backgroundColor:'#111' }}>
+            style={{ paddingHorizontal:16, paddingVertical:10, borderRadius:10, backgroundColor:COLORS.primary }}>
             <Text style={{ color:'#fff' }}>Reintentar</Text>
           </Pressable>
         </View>

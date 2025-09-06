@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 
+import { COLORS } from "../theme";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+
 export type EmailScreenProps = {
   onSubmit?: (email: string) => Promise<void> | void;
 };
@@ -44,7 +47,7 @@ export default function EmailScreen({ onSubmit }: EmailScreenProps) {
         disabled={!email || loading}
         onPress={handlePress}
         style={{
-          backgroundColor: !email ? "#334155" : "#22c55e",
+          backgroundColor: !email ? "#334155" : COLORS.primary,
           borderRadius: 12,
           paddingVertical: 14,
           alignItems: "center",

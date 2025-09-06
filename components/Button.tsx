@@ -35,7 +35,7 @@ export default function Button({
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      android_ripple={{ color: '#16a34a' }}
+      android_ripple={{ color: COLORS.primary }}
       style={({ pressed }) => [
         styles.base,
         isPrimary ? styles.primary : styles.secondary,

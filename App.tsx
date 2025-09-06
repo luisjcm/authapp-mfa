@@ -2,9 +2,11 @@
 import React from 'react';
 import RootNavigator from './navigation';
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { ActivityIndicator, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler'; // 👈 agregado
-import { TotpProvider } from './server/src/state/TotpStore'; // 👈 agregado
+import { ActivityIndicator, View, StatusBar } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { TotpProvider } from './server/src/state/TotpStore';
+import { COLORS } from './theme'; // opcional si quieres usar tu bg/text aquí
 
 export default function App() {
   const [loaded] = useFonts({
@@ -20,7 +22,7 @@ export default function App() {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#0f172a',
+          backgroundColor: COLORS?.bg ?? '#0f172a',
         }}>
         <ActivityIndicator />
       </View>
@@ -29,9 +31,17 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <TotpProvider>
-        <RootNavigator />
-      </TotpProvider>
+      <SafeAreaProvider>
+        {/* StatusBar acorde a tu tema */}
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={COLORS?.bg ?? '#0f172a'}
+        />
+
+        <TotpProvider>
+          <RootNavigator />
+        </TotpProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

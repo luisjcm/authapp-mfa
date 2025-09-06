@@ -1,6 +1,7 @@
 // src/screens/OtpScreen.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { COLORS } from "../theme";
 
 export type OtpScreenProps = {
   email: string;
@@ -104,7 +105,7 @@ export default function OtpScreen({
         disabled={code.length !== otpLength || loading}
         onPress={handleVerify}
         style={{
-          backgroundColor: code.length === otpLength ? "#22c55e" : "#334155",
+          backgroundColor: code.length === otpLength ? COLORS.primary : "#334155",
           borderRadius: 12,
           paddingVertical: 14,
           alignItems: "center",

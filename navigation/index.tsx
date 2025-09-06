@@ -7,19 +7,17 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import BiometricGate from "../components/BiometricGate";
+
+import { COLORS } from '../theme';
+
 
 // PANTALLAS
 import Home from "../screens/Home";
 import EmailScreen from "../screens/EmailScreen";
 import OtpScreen from "../screens/OtpScreen";
 import Done from "../screens/Done";
-
-import AboutScreen from "../screens/AboutScreen"; // 👈 import
-
-
-// 👇 NUEVOS imports
+import AboutScreen from "../screens/AboutScreen"; 
 import AuthenticatorScreen from "../screens/AuthenticatorScreen";
 import AddTokenScreen from "../screens/AddTokenScreen";
 
@@ -28,18 +26,16 @@ import { requestOtp, verifyOtp, resendOtp } from "../server/src/api/auth";
 
 
 
-const DEMO_MODE = true; // ← ponlo en false para la versión real
+const DEMO_MODE = true; 
 
-// ---- Tipado de rutas en UN SOLO STACK ----
-// 👇 AGREGA las rutas nuevas aquí
 export type RootStackParamList = {
   Home: undefined;
   Email: undefined;
   Otp: { email: string };
   Done: undefined;
-  Authenticator: undefined; // ✅ nueva
-  AddToken: undefined;      // ✅ nueva
-  About: undefined;         // ✅ nueva
+  Authenticator: undefined; 
+  AddToken: undefined;      
+  About: undefined;         
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -49,12 +45,12 @@ const MyTheme: Theme = {
   dark: true,
   colors: {
     ...DefaultTheme.colors,
-    background: "#0f172a",
-    card: "#111827",
-    text: "#ffffff",
-    border: "#1f2937",
-    primary: "#22c55e",
-    notification: "#22c55e",
+    background: COLORS.bg,
+    card: COLORS.card,
+    text: COLORS.text,
+    border: COLORS.border,
+    primary: COLORS.primary,        // 🔵 <- clave
+    notification: COLORS.primary,   // si quieres mismo tono para badges
   },
 };
 
@@ -127,10 +123,10 @@ export default function RootNavigator() {
       <Stack.Navigator
         initialRouteName={initialRoute}
         screenOptions={{
-          headerStyle: { backgroundColor: "#111827" },
-          headerTintColor: "#fff",
-          contentStyle: { backgroundColor: "#0f172a" },
-        }}
+  headerStyle: { backgroundColor: COLORS.card },
+  headerTintColor: COLORS.text,
+  contentStyle: { backgroundColor: COLORS.bg },
+}}
       >
         
         <Stack.Screen

@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeIcon: {
-    color: COLORS.primaryText,
+    color: COLORS.text,
     fontFamily: FONTS.bold,
     fontSize: 16,
     lineHeight: 16,
