@@ -97,7 +97,7 @@ export default function AddTokenScreen({ navigation }: any) {
       }
 
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      navigation.replace("Authenticator");
+      navigation.goBack(); 
     } catch (e) {
       setScannedOnce(false);
     } finally {

@@ -23,6 +23,7 @@ import AddTokenScreen from "../screens/AddTokenScreen";
 
 // API (cliente front, NO del server)
 import { requestOtp, verifyOtp, resendOtp } from "../server/src/api/auth";
+import HomeRedesignMockup from "../screens/HomeRedesignMockup";
 
 
 
@@ -135,7 +136,7 @@ export default function RootNavigator() {
 >
   {(props) => (
     <BiometricGate prompt="Confirma con biometría o patrón" demoMode={DEMO_MODE}>
-      <Home {...props} />
+      <HomeRedesignMockup {...props} />
     </BiometricGate>
   )}
 </Stack.Screen>
