@@ -132,7 +132,7 @@ export default function RootNavigator() {
         
         <Stack.Screen
   name="Home"
-  options={{ title: "Inicio" }}
+  options={{ title: "AuthApp" }}
 >
   {(props) => (
     <BiometricGate prompt="Confirma con biometría o patrón" demoMode={DEMO_MODE}>
