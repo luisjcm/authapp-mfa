@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import { Modal, View, Text, Pressable, Animated, Easing } from 'react-native';
+// src/components/DemoBiometricModal.tsx
+import React, { useEffect, useRef, useState } from 'react';
+import { Modal, View, Text, Pressable, Animated, Easing, Platform, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS } from '../theme';
+import { COLORS, RADIUS, SPACING, FONTS } from '../theme';
+import { Fingerprint, ScanFace } from 'lucide-react-native';
 
 type Props = {
   visible: boolean;
   onSuccess: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   title?: string;
   subtitle?: string;
 };
@@ -15,70 +17,184 @@ export default function DemoBiometricModal({
   visible,
   onSuccess,
   onCancel,
-  title = 'Confirma tu identidad',
-  subtitle = 'Simulación para presentación (no solicita FaceID/huella real)',
+  title = Platform.OS === 'ios' ? 'Face ID' : 'Huella dactilar',
+  subtitle = 'Confirma tu identidad para continuar',
 }: Props) {
-  const pulse = useRef(new Animated.Value(1)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const [validating, setValidating] = useState(false);
+  const [ok, setOk] = useState(false);
 
+  // Colores de feedback
+  const SUCCESS = (COLORS as any).success ?? '#22c55e';
+  const SUCCESS_MUTED = 'rgba(34,197,94,0.15)';
+
+  // Animación de pulso base
   useEffect(() => {
     if (!visible) return;
-    const loop = Animated.loop(
+    // reset estado visual
+    setOk(false);
+    setValidating(false);
+
+    Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.08, duration: 800, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 800, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 1.08, duration: 700, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 1.0, duration: 700, easing: Easing.in(Easing.quad), useNativeDriver: true }),
       ])
-    );
-    loop.start();
-    return () => loop.stop();
+    ).start();
+
+    Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start();
+
+    return () => {
+      scale.stopAnimation();
+      opacity.setValue(0);
+      setValidating(false);
+      setOk(false);
+    };
   }, [visible]);
 
-  const handleSuccess = async () => {
-    try { await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
-    onSuccess();
+  const handleValidate = async () => {
+    if (validating) return;
+    setValidating(true);
+
+    // Haptic + cambio de color inmediato
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setOk(true);
+
+    // Mini "pop" de confirmación
+    Animated.sequence([
+      Animated.timing(scale, { toValue: 1.15, duration: 140, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1.0, friction: 5, tension: 100, useNativeDriver: true }),
+    ]).start();
+
+    // Haptic de éxito + callback
+    setTimeout(async () => {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      onSuccess?.();
+    }, 480);
   };
 
   const handleCancel = async () => {
-    try { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
-    onCancel();
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onCancel?.();
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
-      <View style={{ flex:1, backgroundColor:'rgba(0,0,0,0.6)', alignItems:'center', justifyContent:'center', padding:24 }}>
-        <View style={{ width:'100%', maxWidth:420, backgroundColor:'#121212', borderRadius:16, padding:20, gap:16 }}>
-          <Text style={{ color:'#fff', fontSize:18, fontWeight:'600', textAlign:'center' }}>{title}</Text>
-          <Text style={{ color:'#cfcfcf', fontSize:14, textAlign:'center' }}>{subtitle}</Text>
+    <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
+      <View style={styles.backdrop}>
+        <Animated.View style={[styles.card, { opacity }]}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
 
-          <View style={{ alignItems:'center', justifyContent:'center', paddingVertical:10 }}>
-            <Animated.View style={{ transform:[{ scale: pulse }] }}>
-              {/* Ícono simple de huella con “bars”; puedes reemplazar por SVG propio si quieres */}
-              <View style={{ width:96, height:96, borderRadius:48, borderWidth:2, borderColor:'#4da3ff', alignItems:'center', justifyContent:'center' }}>
-                <View style={{ width:62, height:62, borderRadius:31, borderWidth:2, borderColor:'#4da3ff', opacity:0.9 }} />
-                <View style={{ position:'absolute', width:72, height:72, borderRadius:36, borderWidth:2, borderColor:'#4da3ff', opacity:0.5 }} />
-              </View>
-            </Animated.View>
-            <Text style={{ color:'#8fbfff', marginTop:12 }}>Coloca tu dedo (simulado)</Text>
-          </View>
+          <Animated.View
+            style={[
+              styles.scanner,
+              {
+                transform: [{ scale }],
+                backgroundColor: ok ? SUCCESS_MUTED : COLORS.primary,
+                borderColor: ok ? SUCCESS : COLORS.border,
+                borderWidth: ok ? 1.2 : 1,
+              },
+            ]}
+          >
+            {Platform.OS === 'ios' ? (
+              <ScanFace size={60} color={ok ? SUCCESS : COLORS.primary} strokeWidth={1.8} />
+            ) : (
+              <Fingerprint size={60} color={ok ? SUCCESS : COLORS.primary} strokeWidth={1.8} />
+            )}
+          </Animated.View>
 
-          <View style={{ flexDirection:'row', gap:10 }}>
-            <Pressable
-              onPress={handleCancel}
-              style={{ flex:1, paddingVertical:12, borderRadius:10, borderWidth:1, borderColor:'#2a2a2a', backgroundColor:'#1a1a1a', alignItems:'center' }}>
-              <Text style={{ color:'#ddd' }}>Cancelar</Text>
+          <View style={styles.actions}>
+            <Pressable style={[styles.btn, styles.btnGhost]} onPress={handleCancel} disabled={validating}>
+              <Text style={[styles.btnText, styles.btnGhostText]}>Cancelar</Text>
             </Pressable>
 
             <Pressable
-              onPress={handleSuccess}
-              style={{ flex:1, paddingVertical:12, borderRadius:10, backgroundColor:COLORS.primary, alignItems:'center' }}>
-              <Text style={{ color:'#fff', fontWeight:'600' }}>Validar</Text>
+              style={[
+                styles.btn,
+                styles.btnPrimary,
+                validating && styles.btnDisabled,
+                ok && { backgroundColor: SUCCESS },
+              ]}
+              onPress={handleValidate}
+              disabled={validating}
+            >
+              <Text style={styles.btnText}>{validating ? 'Validando…' : (Platform.OS === 'ios' ? 'Usar Face ID' : 'Usar huella')}</Text>
             </Pressable>
           </View>
-
-          <Text style={{ color:'#7a7a7a', fontSize:12, textAlign:'center' }}>
-            *Para demo en pantalla compartida. La app real usará biometría/patrón del sistema.
-          </Text>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(4,8,15,0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.lg,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.xl,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  title: {
+    color: COLORS.text,
+    fontFamily: FONTS.semibold,
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: COLORS.muted,
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  scanner: {
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    alignSelf: 'center',
+    marginVertical: SPACING.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  btn: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnPrimary: {
+    backgroundColor: COLORS.primary,
+  },
+  btnGhost: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: 'transparent',
+  },
+  btnText: {
+    color: COLORS.text,
+    fontFamily: FONTS.semibold,
+    fontSize: 15,
+  },
+  btnGhostText: {
+    color: COLORS.muted,
+  },
+  btnDisabled: {
+    opacity: 0.6,
+  },
+});
