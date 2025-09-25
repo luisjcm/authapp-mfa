@@ -82,7 +82,7 @@ app.post("/api/verify-otp", async (req, res) => {
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server escuchando en http://localhost:${PORT}`);
-  console.log(`🌐 LAN: http://192.168.1.107:${PORT}`); // opcional, pon tu IP
+  console.log(`🌐 LAN: http://192.168.1.110:${PORT}`); // opcional, pon tu IP
 
   console.log(`Email configurado: ${isConfigured() ? 'sí' : 'no'}`);
 });

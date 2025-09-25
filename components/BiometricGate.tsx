@@ -89,7 +89,7 @@ export default function BiometricGate({ children, prompt = 'Confirma tu identida
         {demoMode && (
           <DemoBiometricModal
             visible={showDemo}
-            title="Biometría / Patrón (DEMO)"
+            title="Biometría / Patrón"
             onSuccess={() => {
               setShowDemo(false);
               setGranted(true);
@@ -98,7 +98,7 @@ export default function BiometricGate({ children, prompt = 'Confirma tu identida
             onCancel={() => {
               setShowDemo(false);
               setGranted(false);
-              setError('Autenticación cancelada (demo)');
+              setError('Autenticación cancelada');
             }}
           />
         )}
