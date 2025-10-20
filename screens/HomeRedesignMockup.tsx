@@ -26,6 +26,8 @@ function IconBubbleButton({ icon, label, onPress }: { icon: keyof typeof Ionicon
   );
 }
 
+const FORCE_HOME = process.env.EXPO_PUBLIC_FORCE_HOME === 'true';
+
 const { width } = Dimensions.get('window');
 const SLIDES = [
   {
@@ -92,6 +94,10 @@ export default function HomeRedesignMockup({ navigation }: any) {
   const [forceOnboarding, setForceOnboarding] = useState(false);
 
   useEffect(() => {
+    if (FORCE_HOME) {
+      AsyncStorage.setItem('onboarding_seen', 'true');
+      return;
+    }
     (async () => {
       const seen = await AsyncStorage.getItem('onboarding_seen');
       if (seen !== 'true') setShowOnboarding(true);

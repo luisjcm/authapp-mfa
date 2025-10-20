@@ -27,7 +27,8 @@ import HomeRedesignMockup from "../screens/HomeRedesignMockup";
 
 
 
-const DEMO_MODE = true; 
+const FORCE_HOME = process.env.EXPO_PUBLIC_FORCE_HOME === "true";
+const DEMO_MODE = true;
 
 export type RootStackParamList = {
   Home: undefined;
@@ -56,11 +57,14 @@ const MyTheme: Theme = {
 };
 
 export default function RootNavigator() {
-  const [session, setSession] = useState<{ email: string } | null>(null);
-  const [checking, setChecking] = useState(true);
+  const [session, setSession] = useState<{ email: string } | null>(
+    FORCE_HOME ? { email: "demo@authapp.dev" } : null
+  );
+  const [checking, setChecking] = useState(!FORCE_HOME);
 
   // Carga de sesión al abrir la app
   useEffect(() => {
+    if (FORCE_HOME) return;
     (async () => {
       try {
         const raw = await AsyncStorage.getItem("session");
@@ -73,6 +77,7 @@ export default function RootNavigator() {
 
   // Ruta inicial según sesión
   const initialRoute = useMemo<keyof RootStackParamList>(() => {
+    if (FORCE_HOME) return "Home";
     return session ? "Home" : "Email";
   }, [session]);
 
