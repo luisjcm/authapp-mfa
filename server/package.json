@@ -2,13 +2,14 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.ts",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch index.ts",
     "start": "tsx index.ts",
-    "test:health": "curl http://localhost:4000/api/health",
-    "test:email": "curl -v -X POST http://localhost:4000/api/send-email/verify -H \"Content-Type: application/json\" --data-binary \"@test-email.json\" --fail --show-error",
-    "test:email:link": "curl -v -X POST http://localhost:4000/api/send-email/verify -H \"Content-Type: application/json\" --data-binary \"@test-email-link.json\" --fail --show-error",
-    "test:email:both": "curl -v -X POST http://localhost:4000/api/send-email/verify -H \"Content-Type: application/json\" --data-binary \"@test-email-both.json\" --fail --show-error\""
+    "test:health": "curl http://localhost:3000/api/health",
+    "test:email": "curl -v -X POST http://localhost:3000/api/send-email/verify -H \"Content-Type: application/json\" --data-binary \"@test-email.json\" --fail --show-error",
+    "test:email:link": "curl -v -X POST http://localhost:3000/api/send-email/verify -H \"Content-Type: application/json\" --data-binary \"@test-email-link.json\" --fail --show-error",
+    "test:email:both": "curl -v -X POST http://localhost:3000/api/send-email/verify -H \"Content-Type: application/json\" --data-binary \"@test-email-both.json\" --fail --show-error\""
   },
   "keywords": [],
   "author": "",
