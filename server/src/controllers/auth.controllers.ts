@@ -1,28 +1,9 @@
 import { Request, Response } from "express";
-import crypto from "crypto";
+import { generateTotpSecret, generateTotpCode, verifyTotpCode } from "../utils/totp.js";
 
-const generateTOTP = (secretHex: string): string => {
-    // 1. Obtener el bloque de tiempo actual (ventanas exactas de 30 segundos)
-    const counter = Math.floor(Date.now() / 30000);
 
-    // 2. Guardar el contador en un Buffer de bytes (Formato Big-Endian de 64 bits)
-    const buffer = Buffer.alloc(8);
-    buffer.writeBigInt64BE(BigInt(counter));
+const tempUserDb = new Map<string, string>(); // Simulación de base de datos temporal para almacenar códigos OTP generados
 
-    // 3. Calcular el hash HMAC-SHA1 usando la semilla hex y el bloque de tiempo
-    const hmac = crypto.createHmac("sha1", Buffer.from(secretHex, "hex")).update(buffer).digest();
-
-    // 4. Truncamiento Dinámico (Extracción segura de 4 bytes basada en un offset)
-    const offset = hmac[hmac.length - 1] & 0xf;
-    const binary =
-        ((hmac[offset] & 0x7f) << 24) |
-        ((hmac[offset + 1] & 0xff) << 16) |
-        ((hmac[offset + 2] & 0xff) << 8) |
-        (hmac[offset + 3] & 0xff);
-
-    // 5. Extraer los últimos 6 dígitos numéricos rellenando con ceros si es necesario
-    return (binary % 1000000).toString().padStart(6, "0");
-};
 
 export const login = async (req: Request, res: Response) => {
     try {
@@ -49,12 +30,16 @@ export const login = async (req: Request, res: Response) => {
 
 
             let tempToken = null;
+            let base32Secret = null;
             if(requiresMFA) {
-                const secret = crypto.randomBytes(20).toString("hex");
-                tempToken = generateTOTP(secret);
+
+                base32Secret = generateTotpSecret();
+                tempToken = generateTotpCode({ secret: base32Secret });
+
+                tempUserDb.set(email, base32Secret); // Guardamos el secreto en la "base de datos" temporal
 
                 console.log(`\n🔑 [MFA CHALLENGE] Usuario: ${email}`);
-                console.log(`🔑 [MFA CHALLENGE] Secret: ${secret}`);
+                console.log(`🔑 [MFA CHALLENGE] Secret Base32: ${base32Secret}`);
                 console.log(`==> 🔴 CÓDIGO OTP TEMPORAL (Vence en 30s): ${tempToken} 🔴 <==\n`);
                 }
 
@@ -79,4 +64,56 @@ export const login = async (req: Request, res: Response) => {
             debug_stack: error.stack   // <-- Esto nos dirá en qué línea exacta explotó
         });
     }
-}
+};
+
+export const verifyMFA = async (req: Request, res: Response) => {
+    try {
+        const { email, code } = req.body;
+
+        if (!email || !code) {
+            res.status(400).json({ 
+                status: 'error', 
+                message: 'Faltan parametros requeridos (email y code)' 
+            });
+            return;
+        }
+
+        const savedSecret = tempUserDb.get(email);
+        if (!savedSecret) {
+            return res.status(404).json({ 
+                status: 'error', 
+                message: 'Usuario no encontrado o sesión inválida' 
+            });
+        }
+
+        const isValid = verifyTotpCode(code, { 
+            secret: savedSecret, 
+            window: 1
+         });
+
+         if (!isValid) {
+        tempUserDb.delete(email); // Eliminamos el secreto de la "base de datos" temporal
+        res.json({
+                            status: 'success',
+                            message: 'Autenticación MFA exitosa'
+                        });
+         } else {
+            res.status(401).json({ 
+                status: 'error', 
+                message: 'Código OTP inválido o expirado',
+                valid: false
+            });
+         }
+        } catch (error: any) {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            res.status(500).json({ 
+                status: 'error', 
+                message: 'Error interno en la verificación MFA', 
+                debug_msg: errorMessage,
+                debug_stack: error instanceof Error ? error.stack : undefined
+            });
+        }
+    }
+
+
+     
