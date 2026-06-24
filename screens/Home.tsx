@@ -40,7 +40,7 @@ export default function Home({ navigation }: Props) {
         <Text style={styles.muted}>Siguiente: crear pantallas Login y Verify Code</Text>
 
         <View style={{ height: 16 }} />
-<Button title="Iniciar sesión" onPress={() => navigation.navigate('Email')} />
+<Button title="Iniciar sesión" onPress={() => navigation.navigate('Login')} />
 <Button title="Abrir Authenticator" onPress={() => navigation.navigate('Authenticator')} />
 <Button title="Acerca de" onPress={() => navigation.navigate('About')} />
         </View>

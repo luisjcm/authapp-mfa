@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, Alert, Pressable, Modal, TextInput, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { useTotp } from '../server/src/state/TotpStore';
 import type { TotpAccount } from '../server/src/utils/totp';
 
 export default function TotpListScreen() {

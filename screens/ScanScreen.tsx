@@ -6,8 +6,7 @@ import type { BarcodeType } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { parseOtpauthUri } from '../server/src/utils/totp';
-import { useTotp } from '../server/src/state/TotpStore';
+
 import { COLORS, SPACING, RADIUS, FONTS } from '../theme';
 
 // 1) IMPORTA CommonActions

@@ -1,4 +1,5 @@
 // src/api/auth.ts
+// @ts-ignore: Metro bundler necesita que no tenga extensión, ignoramos la advertencia de NodeNext
 import { API_URL } from "../config";
 
 export async function requestOtp(to: string) {

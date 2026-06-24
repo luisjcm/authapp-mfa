@@ -12,11 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Swipeable } from "react-native-gesture-handler";
 import CircularTimer from "../components/CircularTimer";
-import {
-  TotpAccount,
-  genTotp,
-  remainingSeconds,
-} from "../server/src/utils/totp";
+
 
 import { useFocusEffect } from '@react-navigation/native';
 

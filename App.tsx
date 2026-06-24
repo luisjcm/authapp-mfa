@@ -5,7 +5,6 @@ import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@e
 import { ActivityIndicator, View, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TotpProvider } from './server/src/state/TotpStore';
 import { COLORS } from './theme'; // opcional si quieres usar tu bg/text aquí
 
 export default function App() {
@@ -38,9 +37,7 @@ export default function App() {
           backgroundColor={COLORS?.bg ?? '#0f172a'}
         />
 
-        <TotpProvider>
           <RootNavigator />
-        </TotpProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -5,7 +5,6 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import type { BarcodeType } from "expo-camera";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
-import { parseOtpauthUri, TotpAccount } from "../server/src/utils/totp";
 import { COLORS, SPACING, RADIUS } from "../theme";
 
 const STORAGE_KEY = "totp_accounts";
