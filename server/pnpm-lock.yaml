@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@otplib/totp':
+        specifier: ^13.4.1
+        version: 13.4.1
       cors:
         specifier: ^2.8.6
         version: 2.8.6
