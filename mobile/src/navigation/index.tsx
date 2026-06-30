@@ -39,7 +39,7 @@ export default function RootNavigator() {
         <Stack.Screen 
           name="Home" 
           component={Home} 
-          options={{ title: 'Bóveda Principal', headerLeft: () => null }} // Bloquea volver atrás una vez logueado
+          options={{ headerShown: false }} // Bloquea volver atrás una vez logueado
         />
       </Stack.Navigator>
     </NavigationContainer>

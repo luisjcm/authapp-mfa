@@ -39,7 +39,11 @@ export default function VerifyCode({ route, navigation }: Props) {
     setTimeout(() => {
       setIsLoading(false);
       // Si el código es correcto, lo mandamos a la bóveda (Home)
-      navigation.navigate('Home');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      
+      });
     }, 1500);
   };
 

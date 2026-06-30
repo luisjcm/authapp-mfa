@@ -1,62 +1,76 @@
 // src/screens/Home.tsx
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING } from '../theme';
-import Button from '../components/ui/Button';
-import { RootStackScreenProps } from '../navigation/types';
+import { ComponentProps } from 'react';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons'; // Íconos premium nativos de Expo
+import { COLORS } from '../theme';
+import { HomeTabParamList } from '../navigation/types';
 
-// Tipado estricto
-type Props = RootStackScreenProps<'Home'>;
+// Importamos los cascarones de las pestañas
+import Vault from './Vault';
+import SecureNotes from './SecureNotes';
+import Generator from './Generator';
+import Settings from './Settings'; // Reutilizaremos el que ya tenías o creamos uno básico
 
-export default function Home({ navigation }: Props) {
-  
-  const handleLogout = () => {
-    // Seguridad extrema: Borramos el historial de navegación al salir
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    });
-  };
+const Tab = createBottomTabNavigator<HomeTabParamList>();
 
+export default function Home() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>¡Acceso Concedido! 🔐</Text>
-      <Text style={styles.subtitle}>
-        Has superado la autenticación de doble factor y tu conexión está segura.
-      </Text>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        // Configuración de los íconos de forma dinámica y estricta
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName: ComponentProps<typeof Ionicons>['name'] = 'square';
 
-      <Button 
-        label="Cerrar Sesión" 
-        variant="outline" 
-        onPress={handleLogout} 
-        style={styles.buttonSpacer}
+          if (route.name === 'Vault') {
+            iconName = focused ? 'lock-closed' : 'lock-closed-outline';
+          } else if (route.name === 'SecureNotes') {
+            iconName = focused ? 'document-text' : 'document-text-outline';
+          } else if (route.name === 'Generator') {
+            iconName = focused ? 'refresh-circle' : 'refresh-circle-outline';
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'settings' : 'settings-outline';
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        // Estilización de la barra inferior al estilo Bitwarden (Tema oscuro)
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarStyle: {
+          backgroundColor: COLORS.card,
+          borderTopWidth: 1,
+          borderTopColor: '#1e293b', // Un gris sutil para dividir
+          paddingBottom: 4,
+          paddingTop: 4,
+          height: 60,
+        },
+        headerStyle: {
+          backgroundColor: COLORS.card,
+        },
+        headerTintColor: COLORS.text,
+        headerShadowVisible: false,
+      })}
+    >
+      <Tab.Screen 
+        name="Vault" 
+        component={Vault} 
+        options={{ title: 'Mi Caja Fuerte' }} 
       />
-    </View>
+      <Tab.Screen 
+        name="SecureNotes" 
+        component={SecureNotes} 
+        options={{ title: 'Notas Seguras' }} 
+      />
+      <Tab.Screen 
+        name="Generator" 
+        component={Generator} 
+        options={{ title: 'Generador' }} 
+      />
+      <Tab.Screen 
+        name="Settings" 
+        component={Settings} 
+        options={{ title: 'Ajustes' }} 
+      />
+    </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.xl,
-  },
-  title: {
-    color: COLORS.primary,
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: SPACING.sm,
-  },
-  subtitle: {
-    color: COLORS.textMuted,
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  buttonSpacer: {
-    marginTop: SPACING.xl,
-    width: '100%',
-  },
-});
