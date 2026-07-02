@@ -1,8 +1,12 @@
-import { Router } from "express";
-import { login, verifyMFA } from "../controllers/auth.controllers.js";
+import { FastifyInstance } from 'fastify';
+import { login, verifyMFA } from '../controllers/auth.controllers';
 
-const router = Router();
-router.post("/login", login);
-router.post("/verify", verifyMFA);
+export async function authRoutes(server: FastifyInstance) {
+  
+  // Conectamos el endpoint directamente al controlador real
+  server.post('/send-email/verify', login);
 
-export default router;
+  // Conectamos el endpoint de verificación al controlador real
+  server.post('/verify-otp', verifyMFA);
+
+}
