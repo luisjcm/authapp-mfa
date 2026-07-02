@@ -63,18 +63,34 @@ export default function Button({
 }
 
 const styles = StyleSheet.create({
-  button: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: RADIUS.md,
-    alignItems: 'center',
+ button: {
+    height: 55,
+    borderRadius: 14, // Bordes más modernos y suaves
     justifyContent: 'center',
-    minHeight: 48, // 🍏🤖 Estándar de accesibilidad internacional para áreas táctiles móviles
-    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginVertical: 10,
+    flexDirection: 'row',
+    // Sombras sutiles para dar profundidad (estilo neumórfico o elevado)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6, // Necesario para la sombra en Android
   },
   outlineBorder: {
-    borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderWidth: 1.5,
+    borderColor: '#3B82F6',
+    backgroundColor: 'transparent', // Asegura que el fondo sea transparente
+  },
+  text: {
+    color: '#FFFFFF',
+    fontSize: 17, // Ligeramente más grande
+    fontWeight: '700', // Más peso para legibilidad
+    letterSpacing: 0.5, // Espaciado premium
+  },
+  textOutline: {
+    color: '#3B82F6',
   },
   label: {
     fontSize: 16,

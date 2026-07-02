@@ -46,8 +46,11 @@ export const login = async (
             riskReasons.push("Dispositivo o navegador no reconocido por el sistema (Riesgo Bajo/Medio).");
         }
 
-        const threshold = Number(process.env.RISK_THRESHOLD) || 50;
-        const requiresMFA = riskScore >= threshold;
+       // const threshold = Number(process.env.RISK_THRESHOLD) || 50;
+       // const requiresMFA = riskScore >= threshold;
+
+       // Y fuerza el MFA a true para desarrollo:
+        const requiresMFA = true;
 
         let tempToken = null;
         let base32Secret = null;

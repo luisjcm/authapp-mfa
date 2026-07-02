@@ -13,6 +13,7 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 // 1. Importamos el helper de tipado estricto para esta pantalla
 import { RootStackScreenProps } from '../navigation/types';
+import { loginRequest } from '../api/auth';
 
 // 2. Le decimos a TypeScript: "Esta pantalla pertenece al Login y heredará sus propiedades"
 type Props = RootStackScreenProps<'Login'>;
@@ -24,11 +25,10 @@ export default function Login({ navigation }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Función para simular el disparo hacia tu servidor
-  const handleLoginSubmit = () => {
+ // Reemplaza tu función handleLoginSubmit actual con esta:
+  const handleLoginSubmit = async () => {
     setError('');
-    
-    // Validación básica antes de gastar recursos de red
+
     if (!email.trim() || !password.trim()) {
       setError('Por favor, completa todos los campos.');
       return;
@@ -36,15 +36,29 @@ export default function Login({ navigation }: Props) {
 
     setIsLoading(true);
 
-    // Simulamos un retraso de red de 1.5 segundos (lo que tardará el fetch real)
-    setTimeout(() => {
+    try {
+      // Disparamos la petición real al backend en Fastify
+      const data = await loginRequest(email, password);
+
+      // Evaluamos la decisión del motor de riesgo del backend
+      if (data.decision === 'CHALLENGE_REQUIRED') {
+        // Redirigimos a la pantalla de verificación enviando el email como parámetro
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'VerifyCode', params: { email } }],
+        });
+      } else {
+        // Si no pide MFA (ALLOW_DIRECT), lo mandamos directo al Home
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
+      }
+    } catch (err: any) {
+      setError(err.message || 'Credenciales inválidas o error de red');
+    } finally {
       setIsLoading(false);
-      
-      // 3. MÁXIMA SEGURIDAD EN ACTIONS: 
-      // TypeScript sabe que 'VerifyCode' REQUIERE el parámetro { email: string }.
-      // Si intentas ir sin pasar el objeto, el editor te va a dar un error en rojo antes de compilar.
-      navigation.navigate('VerifyCode', { email: email.toLowerCase().trim() });
-    }, 1500);
+    }
   };
 
   return (
