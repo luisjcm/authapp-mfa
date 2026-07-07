@@ -63,7 +63,7 @@ export const login = async (
 
             console.log(`\n🔑 [MFA CHALLENGE] Usuario: ${email}`);
             console.log(`🔑 [MFA CHALLENGE] Secret Base32: ${base32Secret}`);
-            console.log(`==> 🔴 CÓDIGO OTP (Vence en 30s): ${tempToken} 🔴 <==\n`);
+            console.log(`==> 🔴 CÓDIGO OTP (Vence enr55 30s): ${tempToken} 🔴 <==\n`);
         }
 
         return reply.send({
