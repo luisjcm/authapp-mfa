@@ -14,12 +14,20 @@ import Button from '../components/ui/Button';
 import { RootStackScreenProps } from '../navigation/types';
 
 // 1. Tipamos la pantalla para que exija los parámetros definidos en nuestro enrutador
-type Props = RootStackScreenProps<'VerifyCode'>;
 
-export default function VerifyCode({ route, navigation }: Props) {
+export interface VerifyCodeProps {
+  onBack: () => void;
+  onSuccess: () => void;
+  emailFallback?: string; // Por si no hay navegación
+}
+
+// Mezclamos las Props de Navegación con nuestras props de componente
+type Props = Partial<RootStackScreenProps<'VerifyCode'>> & VerifyCodeProps;
+
+export default function VerifyCode({ route, navigation, emailFallback, onBack, onSuccess }: Props) {
   // 2. Extraemos el email exacto que vino viajando desde la pantalla de Login
-  const { email } = route.params;
-  
+// Manejamos el email de forma segura: Si viene por navegación, úsalo, sino usa el fallback
+  const email = route?.params?.email ?? emailFallback ?? "Usuario";  
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,12 +46,12 @@ export default function VerifyCode({ route, navigation }: Props) {
     // Simulamos la verificación contra el backend
     setTimeout(() => {
       setIsLoading(false);
-      // Si el código es correcto, lo mandamos a la bóveda (Home)
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      
-      });
+      // Lógica Híbrida:
+      if (onSuccess) {
+        onSuccess(); // Si estamos en BiometricGate, ejecutamos el callback
+      } else if (navigation) {
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] }); // Si estamos en navegación normal
+      }
     }, 1500);
   };
 
