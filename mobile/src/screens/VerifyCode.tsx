@@ -1,41 +1,63 @@
-// src/screens/VerifyCode.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   Text, 
   View, 
   KeyboardAvoidingView, 
   Platform, 
-  ScrollView 
+  ScrollView,
+  TouchableOpacity
 } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING } from '../theme';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { RootStackScreenProps } from '../navigation/types';
 
-// 1. Tipamos la pantalla para que exija los parámetros definidos en nuestro enrutador
+type Props = RootStackScreenProps<'VerifyCode'>;
 
-export interface VerifyCodeProps {
-  onBack: () => void;
-  onSuccess: () => void;
-  emailFallback?: string; // Por si no hay navegación
-}
-
-// Mezclamos las Props de Navegación con nuestras props de componente
-type Props = Partial<RootStackScreenProps<'VerifyCode'>> & VerifyCodeProps;
-
-export default function VerifyCode({ route, navigation, emailFallback, onBack, onSuccess }: Props) {
-  // 2. Extraemos el email exacto que vino viajando desde la pantalla de Login
-// Manejamos el email de forma segura: Si viene por navegación, úsalo, sino usa el fallback
-  const email = route?.params?.email ?? emailFallback ?? "Usuario";  
+export default function VerifyCode({ route, navigation }: Props) {
+  const { email } = route.params;
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Estado para saber si el teléfono soporta huella/reconocimiento facial
+  const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
+
+  // 1. Ahora el useEffect SOLO verifica si hay hardware, NO lanza el prompt
+  useEffect(() => {
+    const checkBiometricSupport = async () => {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      setIsBiometricAvailable(hasHardware && isEnrolled);
+    };
+    
+    checkBiometricSupport();
+  }, []);
+
+  const handleBiometricAuth = async () => {
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Verifica tu identidad',
+        cancelLabel: 'Cancelar',
+        disableDeviceFallback: true, // Queremos que use biometría pura aquí
+      });
+
+      if (result.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const handleVerifySubmit = () => {
     setError('');
     
-    // Validación local estricta antes de pegarle al servidor
     if (code.length !== 6) {
       setError('El código debe tener exactamente 6 dígitos.');
       return;
@@ -43,15 +65,9 @@ export default function VerifyCode({ route, navigation, emailFallback, onBack, o
 
     setIsLoading(true);
 
-    // Simulamos la verificación contra el backend
     setTimeout(() => {
       setIsLoading(false);
-      // Lógica Híbrida:
-      if (onSuccess) {
-        onSuccess(); // Si estamos en BiometricGate, ejecutamos el callback
-      } else if (navigation) {
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] }); // Si estamos en navegación normal
-      }
+      navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     }, 1500);
   };
 
@@ -65,18 +81,36 @@ export default function VerifyCode({ route, navigation, emailFallback, onBack, o
         <View style={styles.headerContainer}>
           <Text style={styles.logoText}>Autenticador MFA</Text>
           <Text style={styles.subtitleText}>
-            Ingresa el código temporal de 6 dígitos generado para la cuenta:
+            Elige tu método de verificación para la cuenta:
           </Text>
           <Text style={styles.emailText}>{email}</Text>
         </View>
 
+        {/* --- OPCIÓN 1: BOTÓN DE BIOMETRÍA --- */}
+        {/* Solo se renderiza si el teléfono tiene un lector de huellas configurado */}
+        {isBiometricAvailable && (
+          <View style={styles.biometricSection}>
+            <TouchableOpacity 
+              style={styles.biometricButton} 
+              onPress={handleBiometricAuth}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="finger-print" size={50} color="#60A5FA" />
+              <Text style={styles.biometricText}>Usar Huella Digital</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.dividerText}>--- O INGRESAR CÓDIGO ---</Text>
+          </View>
+        )}
+
+        {/* --- OPCIÓN 2: CÓDIGO MANUAL --- */}
         <Input
           label="Código TOTP"
           placeholder="123456"
           value={code}
           onChangeText={setCode}
           keyboardType="number-pad"
-          maxLength={6} // Evita que el usuario escriba más de 6 números
+          maxLength={6}
           editable={!isLoading}
           error={error}
         />
@@ -126,5 +160,35 @@ const styles = StyleSheet.create({
   },
   buttonSpacer: {
     marginTop: SPACING.md,
+  },
+  
+  // --- Estilos nuevos para la sección de Biometría ---
+  biometricSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  biometricButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1E293B',
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 16,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  biometricText: {
+    color: '#60A5FA',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: SPACING.sm,
+  },
+  dividerText: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginTop: SPACING.xl,
   },
 });
