@@ -86,24 +86,7 @@ export default function VerifyCode({ route, navigation }: Props) {
           <Text style={styles.emailText}>{email}</Text>
         </View>
 
-        {/* --- OPCIÓN 1: BOTÓN DE BIOMETRÍA --- */}
-        {/* Solo se renderiza si el teléfono tiene un lector de huellas configurado */}
-        {isBiometricAvailable && (
-          <View style={styles.biometricSection}>
-            <TouchableOpacity 
-              style={styles.biometricButton} 
-              onPress={handleBiometricAuth}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="finger-print" size={50} color="#60A5FA" />
-              <Text style={styles.biometricText}>Usar Huella Digital</Text>
-            </TouchableOpacity>
-            
-            <Text style={styles.dividerText}>--- O INGRESAR CÓDIGO ---</Text>
-          </View>
-        )}
-
-        {/* --- OPCIÓN 2: CÓDIGO MANUAL --- */}
+        {/* --- OPCIÓN: CÓDIGO MANUAL --- */}
         <Input
           label="Código TOTP"
           placeholder="123456"
@@ -122,6 +105,28 @@ export default function VerifyCode({ route, navigation }: Props) {
           style={styles.buttonSpacer}
         />
 
+          
+
+
+
+        {/* --- OPCIÓN: BOTÓN DE BIOMETRÍA --- */}
+        {/* Solo se renderiza si el teléfono tiene un lector de huellas configurado */}
+        {isBiometricAvailable && (
+          <View style={styles.biometricSection}>
+            <Text style={styles.dividerText}>--- O VERIFICAR CON ---</Text>
+
+            <TouchableOpacity 
+              style={styles.biometricButton} 
+              onPress={handleBiometricAuth}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="finger-print" size={50} color="#60A5FA" />
+              <Text style={styles.biometricText}>Huella Digital</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -159,19 +164,19 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   buttonSpacer: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.xs,
   },
   
   // --- Estilos nuevos para la sección de Biometría ---
   biometricSection: {
     alignItems: 'center',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
   biometricButton: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#1E293B',
-    paddingVertical: SPACING.lg,
+    paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
     borderRadius: 16,
     width: '100%',
@@ -189,6 +194,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 1,
-    marginTop: SPACING.xl,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
 });

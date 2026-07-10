@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ScannerView from '../components/ScannerView';
 import { parseOtpauthUri, TotpAccount } from '../utils/totpParser';
 import { loadAccounts, saveAccounts } from '../utils/storage';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 // --- COMPONENTE: Temporizador Circular Animado ---
 const AnimatedTimer = ({ secondsLeft, color }: { secondsLeft: number, color: string }) => {
@@ -46,6 +47,7 @@ export default function Generator() {
   const [isScanning, setIsScanning] = useState(false);
   const [showFabMenu, setShowFabMenu] = useState(false);
   const [tokens, setTokens] = useState<TotpAccount[]>([]);
+  const navigation = useNavigation<any>();
   
   // Estados para UI Premium
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -59,14 +61,15 @@ export default function Generator() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      const storedTokens = await loadAccounts();
-      setTokens(storedTokens);
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAccounts = async () => {
+        const storedTokens = await loadAccounts();
+        setTokens(storedTokens);
+      };
     fetchAccounts();
-  }, []);
-
+  }, [])
+  );
   const secondsLeft = 30 - (epoch % 30);
 
   // --- LÓGICA DE UI: TOAST ---
@@ -214,7 +217,7 @@ export default function Generator() {
               onPress={() => { 
                 setShowFabMenu(false); 
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                showToast("Funcionalidad en desarrollo");
+                navigation.navigate('ManualSetup');
               }}
             >
               <Text style={styles.menuText}>Ingresar código manual</Text>

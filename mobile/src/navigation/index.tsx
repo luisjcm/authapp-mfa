@@ -9,6 +9,7 @@ import { COLORS } from '../theme';
 import Login from '../screens/Login';
 import VerifyCode from '../screens/VerifyCode';
 import Home from '../screens/Home';
+import ManualSetup from '../screens/ManualSetup';
 
 // Le pasamos nuestro mapa de rutas tipado al Stack
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,6 +41,12 @@ export default function RootNavigator() {
           name="Home" 
           component={Home} 
           options={{ headerShown: false }} // Bloquea volver atrás una vez logueado
+        />
+
+        <Stack.Screen 
+              name="ManualSetup" 
+              component={ManualSetup} 
+              options={{ title: 'Ingreso Manual' }} // O headerMode: 'none' si tienes tu propio header
         />
       </Stack.Navigator>
     </NavigationContainer>

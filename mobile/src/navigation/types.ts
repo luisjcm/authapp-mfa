@@ -10,6 +10,7 @@ export type RootStackParamList = {
   Login: undefined;
   VerifyCode: { email: string }; 
   Home: undefined;
+  ManualSetup: undefined; 
 };
 
 export type HomeTabParamList = {
