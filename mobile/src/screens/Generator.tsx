@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Modal, RefreshControl } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import Svg, { Circle } from 'react-native-svg';
@@ -53,6 +53,24 @@ export default function Generator() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<TotpAccount | null>(null);
   const [epoch, setEpoch] = useState(Math.round(new Date().getTime() / 1000));
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Hacemos que el teléfono vibre ligeramente al estirar
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // Recargamos los datos de la memoria
+    const storedTokens = await loadAccounts();
+    setTokens(storedTokens);
+    
+    // Le damos un pequeño delay artificial de medio segundo 
+    // para que el usuario alcance a ver la animación de recarga.
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 500);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -134,6 +152,8 @@ export default function Generator() {
     if (secondsLeft <= 5) timerColor = '#EF4444'; // Rojo
 
     return (
+
+      
       <TouchableOpacity 
         style={styles.card} 
         activeOpacity={0.6} // Efecto visual suave de pulsación
@@ -166,6 +186,16 @@ export default function Generator() {
           renderItem={renderTokenCard}
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          // --- CONFIGURACIÓN DEL PULL-TO-REFRESH ---
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#60A5FA" // Color del spinner en iOS
+              colors={['#60A5FA']} // Color del spinner en Android
+              progressBackgroundColor="#1E293B" // Fondo del spinner en Android (tu color de tarjeta)
+            />
+          }
         />
       ) : (
         <View style={styles.emptyState}>

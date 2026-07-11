@@ -11,6 +11,8 @@ export type RootStackParamList = {
   VerifyCode: { email: string }; 
   Home: undefined;
   ManualSetup: undefined; 
+  SecureNotes: undefined;
+  NoteEditor: { noteId?: string }; // Opcional: si pasamos un ID, es para editar; si no, es nota nueva
 };
 
 export type HomeTabParamList = {

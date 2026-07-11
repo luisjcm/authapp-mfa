@@ -10,6 +10,7 @@ import Login from '../screens/Login';
 import VerifyCode from '../screens/VerifyCode';
 import Home from '../screens/Home';
 import ManualSetup from '../screens/ManualSetup';
+import NoteEditor from '../screens/NoteEditor';
 
 // Le pasamos nuestro mapa de rutas tipado al Stack
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -47,6 +48,12 @@ export default function RootNavigator() {
               name="ManualSetup" 
               component={ManualSetup} 
               options={{ title: 'Ingreso Manual' }} // O headerMode: 'none' si tienes tu propio header
+        />
+
+        <Stack.Screen 
+          name="NoteEditor" 
+          component={NoteEditor} 
+          options={{ headerShown: false }} 
         />
       </Stack.Navigator>
     </NavigationContainer>
