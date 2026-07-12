@@ -1,6 +1,7 @@
 // src/screens/Home.tsx
 import { ComponentProps } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons'; // Íconos premium nativos de Expo
 import { COLORS } from '../theme';
 import { HomeTabParamList } from '../navigation/types';
@@ -14,6 +15,7 @@ import Settings from './Settings'; // Reutilizaremos el que ya tenías o creamos
 const Tab = createBottomTabNavigator<HomeTabParamList>();
 
 export default function Home() {
+  const insets = useSafeAreaInsets(); // Para manejar el área segura en iOS y Android
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -40,9 +42,13 @@ export default function Home() {
           backgroundColor: COLORS.card,
           borderTopWidth: 1,
           borderTopColor: '#1e293b', // Un gris sutil para dividir
-          paddingBottom: 4,
+          
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 4,
           paddingTop: 4,
-          height: 60,
+          
+          // Le sumamos el espacio de la barra del sistema a los 60px base 
+          // para que los iconos no se aplasten.
+          height: 60 + insets.bottom
         },
         headerStyle: {
           backgroundColor: COLORS.card,
