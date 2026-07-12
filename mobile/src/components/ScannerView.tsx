@@ -29,7 +29,11 @@ export default function ScannerView({ onScan, onCancel }: ScannerProps) {
       <CameraView
         style={StyleSheet.absoluteFill}
         facing="back"
-        onBarcodeScanned={(result) => onScan(result.data)}
+        onBarcodeScanned={(result) => {
+          if (result.data) {
+            onScan(result.data);
+          }
+        }}
       />
       {/* Overlay oscuro con agujero transparente en el medio */}
       <View style={styles.overlay}>

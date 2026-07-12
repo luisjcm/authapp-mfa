@@ -16,13 +16,22 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "package": "com.luisjcm.mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-barcode-scanner"
-    ]
+      
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7dc25ad6-f567-4d4d-a24f-4b744fb72ae1"
+      }
+    }
   }
 }
